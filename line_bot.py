@@ -44,40 +44,7 @@ def index():
     json_line = json.dumps(json_line)
     global decoded
     decoded = json.loads(json_line)
-    #print(decoded)
     print(decoded["events"][0]["message"]["text"])
-    # save userid and groupid in data.json
-    if decoded["events"][0]["source"]["type"] == "user":
-        try:
-            print(decoded["events"][0]["source"]["userId"], decoded["events"][0]["message"]["text"])
-            with open(now_path + '/' + 'data.json', 'r') as f:
-                data = json.load(f)
-                f.close()
-            with open(now_path + '/' + 'data.json', 'w') as f:
-                if decoded["events"][0]["source"]["userId"] in data['userid']:
-                    print('in the userid array')
-                else:
-                    data['userid'].append(decoded["events"][0]["source"]["userId"])
-                json.dump(data, f)
-                f.close()
-
-        except Exception as e:
-            print(e) 
-    elif decoded["events"][0]["source"]["type"] == "group":
-        try:
-            print(decoded["events"][0]["source"]["groupId"], decoded["events"][0]["message"]["text"])
-            with open(now_path + '/' + 'data.json', 'r') as f:
-                data = json.load(f)
-                f.close()
-            with open(now_path + '/' + 'data.json', 'w') as f:
-                if decoded["events"][0]["source"]["groupId"] in data['groupid']:
-                    print('in the groupid array')
-                else:
-                    data['groupid'].append(decoded["events"][0]["source"]["groupId"])
-                json.dump(data, f)
-                f.close()
-        except Exception as e:
-            print(e)
 
     # handle webhook body
     try:
@@ -189,7 +156,9 @@ def handle_message(event):
             with open(os.path.join(person_path, 'url.json'), 'w') as f:
                 json.dump(download_urls, f)  
 
-        line_bot_api.push_message('U4a163602a7d66b0494cc38f4824d4d44', TextSendMessage(text='圖片已抓取'))  
+        line_bot_api.reply_message(
+            event.reply_token, TextSendMessage(text='更新已完成！'))
+        #line_bot_api.push_message('U4a163602a7d66b0494cc38f4824d4d44', TextSendMessage(text='更新已完成！'))  
     # 隨機抽 ig 圖庫裡的圖
     elif event.message.text.lower()==u"ig":
         person_folders = os.listdir(ig_save_path)
@@ -271,6 +240,8 @@ def handle_message(event):
         user_message = event.message.text[4:]
         line_bot_api.push_message(keys.my_user_id,TextSendMessage(text=user_message))
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=' 已送達！'))
+    
+
     '''
     # 設定到價通知
     elif event.message.text[:5]==u"order":
